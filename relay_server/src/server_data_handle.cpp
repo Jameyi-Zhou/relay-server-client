@@ -1,6 +1,11 @@
 #include "server_data_handle.h"
 
-using namespace std;
+std::string intToString8(int x){
+    std::string temp = std::to_string(x);
+    for(int len = temp.length(); len < 8; ++len)
+        temp = "#" + temp;
+    return temp;
+}
 
 ServerDataHandler::ServerDataHandler(){
     rawdata = packeddata = processeddata.content = "";
@@ -12,8 +17,7 @@ int ServerDataHandler::getRawdata(int senderfd){
     char buff[BUFFER_SIZE] = {0};
 	int res = read(senderfd, buff, BUFFER_SIZE);
     rawdata = buff;
-    //cout << rawdata.length() << endl;
-    return res;
+    return rawdata.length();
 }
 
 void ServerDataHandler::unpackData(){

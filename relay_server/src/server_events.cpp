@@ -7,7 +7,10 @@ RelayServer::RelayServer(){
 	servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servaddr.sin_port = htons(SERV_PORT);
-
+	listenfd = -1;
+	ev = nullptr;
+	cliaddr = nullptr;
+	first_unused_ID = 0;
 	//初始化epoll
 	if( (epollfd = epoll_create(MAXFD)) < 0)
 		cout << "create epollfd error!";
@@ -81,17 +84,22 @@ void RelayServer::addInputfdtoEpoll(int inputfd){
     epoll_ctl(epollfd, EPOLL_CTL_ADD, inputfd, ev);
 }
 
-void RelayServer::dealClientData(int senderfd) { //处理客户端数据
+void RelayServer::dealClientData(int senderfd) { //处理客户端发送过来的数据，并转发给另外一客户端
 	ServerDataHandler s_data_handler;
-	if( s_data_handler.getRawdata(senderfd) == 0){
+	int res = s_data_handler.getRawdata(senderfd);
+	if(res == 0){
 		clientUnlink(senderfd);
 		return;
 	}
-	
+	else if(res == 24){
+		std::string s = std::to_string(fdtoid_table[senderfd]);
+	}
+	/*
 	s_data_handler.unpackData();
 	int receiverfd = idtofd_table[s_data_handler.getReceiverID()];
 	s_data_handler.packData();
 	s_data_handler.sendPackedData(receiverfd);
+	*/
 }
 
 bool RelayServer::handleEvents(){
@@ -114,15 +122,5 @@ bool RelayServer::handleEvents(){
 	return 1;
 }
 
-int main(int argc, char **argv){ 
-	RelayServer server1;
-	server1.listenToClients();
-    while(1){
-		if(!server1.handleEvents()){
-			cout << "erorr ocurrs when handle epoll events!\n";
-			exit(1);
-		}
-	}
-	exit(0);
-}
+
 

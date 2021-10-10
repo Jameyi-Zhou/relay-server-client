@@ -18,7 +18,7 @@ class RelayServer{
 private:
     struct sockaddr_in servaddr, *cliaddr;
     struct epoll_event events[MAXFD], *ev; //*ev 和 *cliaddr都是之后动态分配的，每连接一个用户new一个
-    int idtofd_table[MAXFD], fdtoid_table[MAXFD], first_unused_ID = 0; //该行定义的变量记录用户的登录信息
+    int idtofd_table[MAXFD], fdtoid_table[MAXFD], first_unused_ID; //该行定义的变量记录用户的登录信息
     int listenfd, epollfd; 
 public:
     RelayServer();
