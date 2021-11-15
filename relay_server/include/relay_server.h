@@ -11,26 +11,27 @@
 class EpollController{
 private:
     int epollfd;
-    epoll_event events[MAXFD]; 
 public:
-    bool epollAddSocketfd(int socketfd);
-    bool epollDelSocketfd(int socketfd);
-    bool epollAddfdOut(int socketfd);
-    bool epollDelfdOut(int socketfd);
+    epoll_event event_active[MAXFD];
+    EpollController();
+    ~EpollController(){}
+    bool create();
+    bool destroy();
+    bool addSocketfd(int socketfd);
+    bool delSocketfd(int socketfd);
+    bool addfdOut(int socketfd);
+    bool delfdOut(int socketfd);
+    int waitEvents();
 };
 
 class RelayServer{
 private:
     sockaddr_in servaddr, cliaddr[MAXFD];
-    //
-    int epollfd;
-    epoll_event events[MAXFD]; 
-    //
+    EpollController epoller;
     ServerIOHandler sih[MAX_HANDLER_COUNT];
     int idtofd_table[MAXFD], fdtoid_table[MAXFD];
     int listenfd; 
     int fd_count;
-
 public:
     RelayServer();
     ~RelayServer();
@@ -41,13 +42,6 @@ public:
     int dealRecv(int senderfd);
     int dealSend(int receiverfd);
     int handleEvents();
-
-    //
-    bool epollAddSocketfd(int socketfd);
-    bool epollDelSocketfd(int socketfd);
-    bool epollAddfdOut(int socketfd);
-    bool epollDelfdOut(int socketfd);
-    //
 };
 
 #endif

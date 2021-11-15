@@ -9,28 +9,30 @@
 #define SERV_PORT 10101
 #define MAXFD 8192
 
-#define CLIENT_NUM 2000
+#define CLIENT_NUM 100
 #define RELAY_COUNT 10000
-#define TEST_DATA_LEN 10240
+#define TEST_DATA_LEN 1024
 
 class EpollController{
 private:
     int epollfd;
-    epoll_event events[CLIENT_NUM];
 public:
-    bool epollAddSocketfd(int socketfd);
-    bool epollDelSocketfd(int socketfd);
-    bool epollAddfdOut(int socketfd);
-    bool epollDelfdOut(int socketfd);
+    epoll_event event_active[CLIENT_NUM];
+    EpollController();
+    ~EpollController(){}
+    bool create();
+    bool destroy();
+    bool addSocketfd(int socketfd);
+    bool delSocketfd(int socketfd);
+    bool addfdOut(int socketfd);
+    bool delfdOut(int socketfd);
+    int waitEvents();
 };
 
 class Client{
 private:
     sockaddr_in servaddr; //服务器套接字地址
-    //
-    int epollfd;
-    epoll_event events[CLIENT_NUM];
-    //
+    EpollController epoller;
     ClientIOHandler cih[CLIENT_NUM]; //客户端的IO处理器
     int fdtohandler[MAXFD]; //存储sockfd到处理器号的映射
     int sockfd[CLIENT_NUM]; //客户端的socketfd
@@ -40,12 +42,7 @@ public:
     ~Client();
     bool init(char *addrip);
     bool connecttoServer();
-    //
-    bool epollAddSocketfd(int socketfd);
-    bool epollDelSocketfd(int socketfd);
-    bool epollAddfdOut(int socketfd);
-    bool epollDelfdOut(int socketfd);
-    //
+  
     int dealSend(int sockfd);
     int dealRecv(int sockfd);
     bool handleEvents();
